@@ -179,6 +179,21 @@ const logoutUser = asyncHandler( async(req , res) => {
     
 })
 
+// endpoint to getCurrentuser 
+
+const getCurrentUser = asyncHandler( async(req , res) => {
+
+    if(!req.user) {
+        throw new apiError(401 , "unauthorized access");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , req.user , "user fetched successfully")
+    )
+})
+
 // end point to get the profile 
 
 const getProfile = asyncHandler( async(req , res) =>{
@@ -234,7 +249,7 @@ const updateUser = asyncHandler( async (req , res ) =>{
         {
             new : true
         }
-    )
+    ).select("-password ");
 
     if(!updatedUser) {
         throw new apiError(404 , "user not found");
@@ -247,11 +262,49 @@ const updateUser = asyncHandler( async (req , res ) =>{
     )  
 })
 
+// endpoint to change password 
+
+const changeCurrentPassword = asyncHandler( async(req , res) =>{
+    const { oldPassword , newPassword } = req.body;
+
+    if(!oldPassword && !newPassword){
+        throw new apiError(400 , "old password and new password are required");
+   
+    }
+
+    const user = User.findById(req.user?._id);
+
+    if(!user) {
+        throw new apiError(404 , "user not found");
+    }
+
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+    if(!isPasswordCorrect) {
+        throw new apiError(400 , "old password is incorrect");
+    }
+
+    // here no need to hash password coz i add my custom method to UserSchema which if hashing pass if password is modified
+
+    user.password = newPassword;
+    await user.save({ validateBeforeSave : false})
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , {} , "password changed successfully")
+    )
+})
+
+
+
 export {
     registerUser,
     loginUser,
     logoutUser,
     getProfile,
-    updateUser
+    updateUser,
+    changeCurrentPassword,
+    getCurrentUser
 
 }
