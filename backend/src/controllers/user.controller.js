@@ -142,8 +142,46 @@ const loginUser = asyncHandler( async ( req, res) => {
 })
 
 
+
+// endpoint to logout a user 
+
+const logoutUser = asyncHandler( async(req , res) => {
+
+    if(!req.user){
+        throw new apiError(401 , "unauthorized access");
+    
+    }
+
+    User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                refreshToken : ""
+            }
+        },
+        {
+            new : true
+        }
+    )
+
+    const options = {
+        httpOnly : true,
+        secure : true
+    }
+
+    return res
+    .status(201)
+    .cookie("refreshToken" , "" , options)
+    .cookie("accessToken" , "" , options)
+    .json(
+        new apiResponse(200 , {} , "user logged out successfully")
+    )
+    
+})
+
 export {
     registerUser,
-    loginUser
+    loginUser,
+    logoutUser
 
 }
