@@ -179,9 +179,32 @@ const logoutUser = asyncHandler( async(req , res) => {
     
 })
 
+// end point to get the profile 
+
+const getProfile = asyncHandler( async(req , res) =>{
+
+    const userId = req.params.id;
+    if(!userId) {
+        throw new apiError(400, "user id is required");
+    }
+
+    const user = await User.findById(userId).select("-password -refreshToken");
+
+    if(!user) {
+        throw new apiError(404 , "user not found");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , user , "user profile fetched successfully")
+    )
+})
+
 export {
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    getProfile
 
 }
