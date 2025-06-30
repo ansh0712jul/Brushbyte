@@ -201,10 +201,57 @@ const getProfile = asyncHandler( async(req , res) =>{
     )
 })
 
+// endpoint to update user 
+
+const updateUser = asyncHandler( async (req , res ) =>{
+
+    if(!req.user) {
+        throw new apiError(401 , "Unacuthorized access");
+    }
+    const userId = req.user._id;
+    const { username , bio } = req.body;
+    let profileImg = req.file?.path;
+
+    let imageUrl = "";
+
+    if(profileImg) {
+
+        // upload image on cloudinary
+        const cloudinaryResponse = await uploadOnCloudinary(profileImg);
+        imageUrl = cloudinaryResponse.url;
+    }
+
+    // find user and update it
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+            $set:{
+                username,
+                bio,
+                profileImg: imageUrl
+            }
+        },
+        {
+            new : true
+        }
+    )
+
+    if(!updatedUser) {
+        throw new apiError(404 , "user not found");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , updatedUser , "user updated successfully")
+    )  
+})
+
 export {
     registerUser,
     loginUser,
     logoutUser,
-    getProfile
+    getProfile,
+    updateUser
 
 }
