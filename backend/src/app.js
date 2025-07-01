@@ -29,8 +29,10 @@ app.use(cookieParser())
 
 // import routes here 
 import userRouter from "./routes/user.routes.js"
+import postRouter from "./routes/post.routes.js"
 
 
 app.use("/api/v1/users" , userRouter );
+app.use("/api/v1/users/posts",postRouter);
 
 export { app };
