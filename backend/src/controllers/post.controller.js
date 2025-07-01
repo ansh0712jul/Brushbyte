@@ -128,9 +128,48 @@ const getLoggedInUserPosts = asyncHandler( async(req,res) =>{
 
 
 
+// endpoint to like or dislike post 
 
+const likeorDislikePost = asyncHandler( async(req , res) =>{
 
+    const userId = req.user?._id;
+    
+    if(!userId) {
+        throw new apiError(401 , "unauthorized access");
+    }
 
+    const postId = req.params.id;
+    if(!postId) {
+        throw new apiError(400 , "post id is required");
+    }
+
+    const post = await Post.findById(postId);
+    if(!post){
+        throw new apiError(404 , "post not found");
+    
+    }
+
+    let msg=""
+
+    
+
+    if(!post.likes.includes(userId)){
+        post.likes.push(userId);
+        msg="post liked successfully"
+    }
+    else {
+        // post.updateOne({$addToSet:{likes:userId}})  --> this will only add unique likes 
+        post.likes.pull(userId);
+        msg="post unliked successfully"
+
+    }
+    await post.save({validateBeforeSave:false});
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , msg , post)
+    )
+})
 
 
 
@@ -140,5 +179,6 @@ const getLoggedInUserPosts = asyncHandler( async(req,res) =>{
 export {
     addnewPost,
     getAllPosts,
-    getLoggedInUserPosts
+    getLoggedInUserPosts,
+    likeorDislikePost
 }
