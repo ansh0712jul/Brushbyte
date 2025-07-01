@@ -297,6 +297,151 @@ const changeCurrentPassword = asyncHandler( async(req , res) =>{
 })
 
 
+// endpoint to follow or unfollow a user 
+
+const followOrUnfollowUser = asyncHandler( async(req,res) =>{
+
+    const userId = req.user?._id;
+    if(!userId) {
+        throw new apiError(401 , "unauthorized access");
+    }
+
+    const followedUserId = req.params.id  //jise current user ko follow krna hai
+    console.log(followedUserId)
+
+    if(!followedUserId) {
+        throw new apiError(400 , "user id is required");
+    }
+
+    const user = await User.findById(userId);
+    if(!user) {
+        throw new apiError(404 , "user not found");
+    }
+
+    const followedUser = await User.findById(followedUserId);
+    if(!followedUser) {
+        throw new apiError(404 , "followed user not found");
+    }
+
+    if(userId === followedUserId) {
+        throw new apiError(400 , "you can't follow yourself");
+    }
+
+    let message = "";
+
+    // logic to follow or unfollo a user 
+
+    if(user.following.includes.apply(followedUserId )) {
+        user.following = user.following.filter( (id) => id !== followedUserId);
+        followedUser.followers = followedUser.followers.filter( (id) => id !== userId);
+        message = "user unfollowed successfully";
+    }
+    else {
+        user.following.push(followedUserId);
+        followedUser.followers.push(userId);
+        message = "user followed successfully";
+    }
+
+
+
+    // likhne ka dusra tarika 
+
+    // const isFollowing = user.following.includes(followedUserId);
+    // if(isFollowing){
+    //     // unfollow logic 
+    //     Promise.all([
+    //         User.updateOne(
+    //             { _id : userId },
+    //             {
+    //                 $pull:{
+    //                     following : followedUserId
+    //                 }
+    //             }
+    //         ),
+    //         User.updateOne(
+    //             { _id : followedUserId },
+    //             {
+    //                 $pull : {
+    //                     followers : userId
+    //                 }
+    //             }
+    //         )
+    //     ])
+    // }
+    // else {
+    //     // follow logic 
+    //     Promise.all([
+    //         User.updateOne(
+    //             { _id : userId },
+    //             {
+    //                 $push : {
+    //                     following : followedUserId
+    //                 }
+    //             }
+    //         ),
+    //         User.updateOne(
+    //             { _id : followedUserId },
+    //             {
+    //                 $push : {
+    //                     followers : userId
+    //                 }
+    //             }
+    //         )
+    //     ])
+    // }
+
+// note --> promise.all tab use krte hai when we have multiple asynchronous operations to perform and we have to wait for all of them to complete
+
+
+
+
+
+    await user.save( { validateBeforeSave : false });
+    await followedUser.save({ validateBeforeSave : false });
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , {} , message)
+    )
+
+})
+
+
+// endpoint to get suggested user 
+
+const getSuggestedUsers = asyncHandler( async(req , res) => {
+
+    const currentUser  = await User.findById(req.user?._id);
+    if(!currentUser) {
+        throw new apiError(404 , "user not found");
+    }
+
+    // users that current user follows
+    const followingUserIds = currentUser.following;
+
+    // suggested user that are followed by the following of current user 
+    const suggestedUsers = await User.find({
+        _id:{$nin: [...followingUserIds , req.user._id]},
+        following:{$in : followingUserIds}
+    }).limit(5).select("-password -refreshToken");
+
+    if (!suggestedUsers || suggestedUsers.length === 0) {
+        const newUsers = await User.find()
+            .limit(5)
+            .sort({ createdAt: -1 })
+            .select("-password -refreshToken");
+        suggestedUsers.push(...newUsers);
+    }
+
+    suggestedUsers.shift();
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , "suggested users fetched successfully" , suggestedUsers)
+    )
+})
 
 export {
     registerUser,
@@ -305,6 +450,8 @@ export {
     getProfile,
     updateUser,
     changeCurrentPassword,
-    getCurrentUser
+    getCurrentUser,
+    followOrUnfollowUser,
+    getSuggestedUsers
 
 }
