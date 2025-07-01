@@ -1,7 +1,7 @@
 import { Router } from "express";
 import verifyJwt from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/multer.middleware.js";
-import { addCommentOnPost, addnewPost, getAllComments, getAllPosts, getLoggedInUserPosts, likeorDislikePost } from "../controllers/post.controller.js";
+import { addCommentOnPost, addnewPost,  getAllComments, getAllPosts, getLoggedInUserPosts, likeorDislikePost } from "../controllers/post.controller.js";
 
 
 const router = Router()

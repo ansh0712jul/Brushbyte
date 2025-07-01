@@ -243,11 +243,14 @@ const getAllComments = asyncHandler(async (req, res) => {
     .json(new apiResponse(200,comments,"comments fetched successfully"))
 })
 
+
+
 export {
     addnewPost,
     getAllPosts,
     getLoggedInUserPosts,
     likeorDislikePost,
     addCommentOnPost,
-    getAllComments
+    getAllComments,
+    
 }
