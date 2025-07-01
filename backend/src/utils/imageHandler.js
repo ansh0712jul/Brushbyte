@@ -1,7 +1,7 @@
 
 import sharp from "sharp";
 import path from "path";
-
+import fs from "fs"
 
 const handleImageUpload = async(file) =>{
 
@@ -25,7 +25,7 @@ const handleImageUpload = async(file) =>{
             quality: 90
         })
         .toFile(outputPath);
-
+        fs.unlinkSync(inputPath);
          return outputPath;    
         
     } catch (error) {
