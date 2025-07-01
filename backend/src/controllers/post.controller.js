@@ -10,8 +10,6 @@ import handleImageUpload from "../utils/imageHandler.js";
 
 
 
-
-
 // endpoint to add new post 
 const addnewPost = asyncHandler(async(req , res) => {
 
@@ -63,6 +61,84 @@ const addnewPost = asyncHandler(async(req , res) => {
     
 })
 
+
+// enpoint to get all posts 
+const getAllPosts = asyncHandler(async( req , res) =>{
+
+    const posts = await Post
+    .find()
+    .sort({createdAt : -1})
+    .populate({
+        path:"author",
+        select:"username , profileImg"
+    })
+    .populate({
+        path:"comments", //posts pr jo comment h unhe populate kiyah 
+        sort:{createdAt : -1},
+        populate:{
+            path:"author",
+            select: "username , profileImg"
+        }
+    })
+
+    if(!posts) {
+        throw new apiError(404 , "post not found");
+    }
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , "all posts" , posts)
+    )
+    
+})
+
+// enpoint to get current user post 
+
+const getLoggedInUserPosts = asyncHandler( async(req,res) =>{
+    const userId = req.user?._id;
+    if(!userId) {
+        throw new apiError(401 , "unauthorized access");
+    }
+
+    const posts = await Post.find({author:userId})
+    .sort({createdAt : -1})
+    .populate({
+        path:"author",
+        select : "username , profileImg"
+    })
+    .populate({
+        path:"comments", //posts pr jo comment h unhe populate kiyah 
+        sort:{createdAt : -1},
+        populate:{
+            path:"author",
+            select: "username , profileImg"
+        }
+    })
+
+    if(!posts) {
+        throw new apiError(404 , "error while fetching posts")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , "loggedIn user posts fetched succesfully" , posts)
+    )
+})
+
+
+
+
+
+
+
+
+
+
+
+
 export {
-    addnewPost
+    addnewPost,
+    getAllPosts,
+    getLoggedInUserPosts
 }
