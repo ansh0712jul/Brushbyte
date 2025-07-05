@@ -70,7 +70,7 @@ const SignUp = () => {
                   <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
                   <img
-                    src="https://i.ibb.co/5K4dScT/default-avatar.png"
+                    src="https://www.w3schools.com/howto/img_avatar.png"
                     alt="Default avatar"
                     className="w-full h-full object-cover"
                   />
