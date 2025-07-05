@@ -244,6 +244,52 @@ const getAllComments = asyncHandler(async (req, res) => {
 })
 
 
+// api to delete a post 
+
+const deletePost = asyncHandler( async (req , res) => {
+
+    const postId = req.params.postId;
+    if(!postId) {
+        throw new apiError(400 , "post id is required");
+
+    }
+
+    const author = req.user?._id;
+    if(!author) {
+        throw new apiError(401 , "unauthorized access");
+    }
+    const post = await Post.findById(postId);
+    if(!post) {
+        throw new apiError(404 , "post not found");
+    }
+
+    if(post.author.toString() !== author.toString()) {
+        throw new apiError(401 , "unauthorized access");
+    }
+
+    await Post.findByIdAndDelete(postId);
+
+    // delete post from the user also 
+
+    let user = await User.findById(author);
+    if(!user) {
+        throw new apiError(404 , "user not found");
+    }
+
+    user.posts = user.posts.filter( id => id.toString() !== postId.toString()); 
+    await user.save({validateBeforeSave:false});
+
+    // deleting associated comments also 
+
+    await Comment.deleteMany({post:postId});
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , {} ,  "post deleted successfully")
+    )
+
+})
 
 export {
     addnewPost,
@@ -252,5 +298,6 @@ export {
     likeorDislikePost,
     addCommentOnPost,
     getAllComments,
+    deletePost
     
 }
