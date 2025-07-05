@@ -291,6 +291,49 @@ const deletePost = asyncHandler( async (req , res) => {
 
 })
 
+// endpoint to bookmark a post 
+
+const bookMarkPost = asyncHandler( async(req , res) =>{
+
+    const postId = req.params.postId;
+    if(!postId) {
+        throw new apiError(400 , "post id is required");
+    }
+
+    const authorId = req.user?._id;
+    if(!authorId){
+        throw new apiError(401 , "unauthorized access");
+    }
+
+    const post = await Post.findById(postId);
+    if(!post) {
+        throw new apiError(404 , "post not found");
+    }
+
+    const author = await User.findById(authorId);
+    if(!author) {
+        throw new apiError(404 , "user not found");
+    }
+    
+    let msg = ""
+    if(author.bookmarks.includes(postId)){
+        await author.updateOne( {$pull : {bookmarks : post._id}});
+        msg = "post unbookmarked successfully"
+    }
+
+    else {
+        await author.updateOne( {$addToSet : {bookmarks : post._id}});
+        msg = "post bookmarked successfully"
+    }
+    
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , {} , msg)
+    )
+})
+
 export {
     addnewPost,
     getAllPosts,
@@ -298,6 +341,7 @@ export {
     likeorDislikePost,
     addCommentOnPost,
     getAllComments,
-    deletePost
+    deletePost,
+    bookMarkPost
     
 }
