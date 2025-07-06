@@ -16,7 +16,7 @@ const AppRoutes = () => {
 
             {/* main layout route with nested children */}
             <Route path= "/" element={<MainLayout/>} >
-                <Route path="/home" element={<Home/>}/>
+                <Route path="/" element={<Home/>}/>
                 <Route path='/profile' element={<Profile/>}/>
             </Route>
 
