@@ -52,9 +52,22 @@ const LeftSidebar = () => {
     // function to handle logout 
     const logOutHandler = async() =>{
         try {
-            const res = await axios.post('/logout')
+            const accessToken = localStorage.getItem('accessToken')
+            console.log(accessToken)
+            const res = await axios.post('/logout', {}, {
+                headers: {
+                    'Authorization' : `Bearer ${accessToken}`,   
+                },
+                
+            })
 
-            if(res.success) {
+            // remove token from the local storage on successful logout
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+
+            // console.log(res)
+
+            if(res.data.success) {
                 Navigate('/login')
                 toast.success("Logged out successfully")
             }

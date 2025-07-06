@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import axios from '../config/Axios'
+import { toast } from 'sonner'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -20,7 +21,18 @@ const Login = () => {
       })
 
       console.log('User logged in successfully:', response.data)
-      navigate('/home')
+
+      const accessToken = response.data.data.accessToken
+      const refreshToken = response.data.data.refreshToken
+      
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      
+      if(response.data.success) {
+        navigate("/")
+        toast.success('Login successful!')
+      }
+
     } catch (error) {
       console.error('Error logging in:', error)
       
