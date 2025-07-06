@@ -87,7 +87,7 @@ const registerUser = asyncHandler( async( req , res ) => {
 
     res.status(201)
        .json(
-         new apiResponse(201 , createdUser, "user created successfully"  )
+         new apiResponse(201 , "user created successfully", createdUser   )
        )
 
 
@@ -132,12 +132,13 @@ const loginUser = asyncHandler( async ( req, res) => {
     .cookie("accessToken", accessToken,options)
     .json(
         new apiResponse(201 , 
+            "user logged in successfully",
             {
                 user,
                 accessToken,
                 refreshToken
             }
-          , "user logged in successfully")
+          )
     )
 })
 
@@ -174,7 +175,7 @@ const logoutUser = asyncHandler( async(req , res) => {
     .cookie("refreshToken" , "" , options)
     .cookie("accessToken" , "" , options)
     .json(
-        new apiResponse(200 , {} , "user logged out successfully")
+        new apiResponse(200 ,  "user logged out successfully" , {})
     )
     
 })
@@ -190,7 +191,7 @@ const getCurrentUser = asyncHandler( async(req , res) => {
     return res
     .status(200)
     .json(
-        new apiResponse(200 , req.user , "user fetched successfully")
+        new apiResponse(200 , "user fetched successfully" , req.user )
     )
 })
 
