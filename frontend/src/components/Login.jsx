@@ -4,9 +4,12 @@ import { Input } from './ui/input'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import axios from '../config/Axios'
 import { toast } from 'sonner'
+import { useDispatch } from 'react-redux'
+import { setUser } from '../redux/authSlice'
 
 const Login = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -27,8 +30,11 @@ const Login = () => {
       
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+
+      
       
       if(response.data.success) {
+        dispatch(setUser(response.data.data.user))
         navigate("/")
         toast.success('Login successful!')
       }
