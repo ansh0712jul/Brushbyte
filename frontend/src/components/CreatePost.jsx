@@ -4,11 +4,16 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Dialog, DialogContent, DialogHeader } from './ui/dialog'
 import { Textarea } from './ui/textarea'
 import { useRef, useState } from 'react'
-
+import axios from "../config/Axios.js"
+import { Loader2 } from 'lucide-react'
+import { toast } from "sonner"
+ 
 const CreatePost = ({ open, setOpen }) => {
 
     const [caption, setCaption] = useState("")
+    const [selectedFile, setSelectedFile] = useState(null)
     const [previewImage, setPreviewImage] = useState(null)
+    const[loading , setLoading] = useState(false)
     const imageRef = useRef(null)
      
     const user = useSelector((state) => state.auth.user)
@@ -19,7 +24,41 @@ const CreatePost = ({ open, setOpen }) => {
         if (file) {
             const url = URL.createObjectURL(file);
             setPreviewImage(url);
+            setSelectedFile(file);
         }
+    }
+
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+        console.error("No access token found");
+    }
+    const createPostHandler = async() => {
+      const formData = new FormData();
+      formData.append('caption' , caption);
+      if( previewImage) formData.append('image', selectedFile);
+
+      try {
+        setLoading(true);
+        const res = await axios.post('/posts/add-new-post' , formData , {
+          headers : {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        console.log(res);
+        // console.log(res.data.message);
+        setOpen(false);
+        setCaption("");
+        setSelectedFile(null);
+        setPreviewImage(null);
+        toast.success(res.data.message);
+
+      } catch (error) {
+        console.log(error);
+        toast.error(error?.response?.data?.message )
+      } finally{
+        setLoading(false);
+      }
     }
 
  return (
@@ -56,20 +95,33 @@ const CreatePost = ({ open, setOpen }) => {
            onChange={imageHandler} 
         />
         {
-            !previewImage ? (
-                <button 
-                    onClick={() => imageRef.current.click()}
-                    className='bg-blue-500 text-white px-4 py-2 rounded'
-                    >  Select Post from Gallery
-                </button>
-            ) : (
-                <button 
-                    onClick={() => imageRef.current.click()}
-                    className='bg-blue-500 text-white px-4 py-2 rounded'
-                    >  Add post
-                </button>
-            )
-        }
+  !previewImage ? (
+    <button 
+      onClick={() => imageRef.current.click()}
+      className='bg-blue-500 text-white px-4 py-2 rounded min-w-[160px] h-10'
+    >
+      Select Post from Gallery
+    </button>
+  ) : (
+    loading ? (
+      <button
+        className='bg-blue-500 text-white px-4 py-2 rounded flex items-center justify-center gap-2 min-w-[160px] h-10'
+        disabled
+      >
+        <Loader2 className='h-4 w-4 animate-spin' />
+        Please wait
+      </button>
+    ) : (
+      <button 
+        onClick={createPostHandler}
+        className='bg-blue-500 text-white px-4 py-2 rounded min-w-[160px] h-10'
+      >  
+        Add Post
+      </button>
+    )
+  )
+}
+
 
        
       </DialogContent>
