@@ -4,50 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage   } from './ui/avatar';
 import axios from '../config/Axios'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useSelector } from 'react-redux';
 
-const sideBarItems = [
-    {
-        icon : <Home/>,
-        text : "Home"
-    },
-    {
-        icon : <Search/>,
-        text : "Search"
-    },
-    {
-        icon : <TrendingUp/>,
-        text : "Explore"
-    },
-    {
-        icon : <MessageCircle/>,
-        text : "Messages"
-    },
-    {
-        icon : <Heart/>,
-        text : "Notitications"
-    },
-    {
-        icon : <PlusSquare/>,
-        text : "Create "
-    },
-    {
-        icon : (
-            <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-        ),
-        text : "Profile"
-    },
-    {
-        icon : <LogOut/>,
-        text : "Logout"
-    }
-]
 
 const LeftSidebar = () => {
 
     const Navigate = useNavigate()
+
+    const { user } = useSelector((state) => state.auth)
 
     // function to handle logout 
     const logOutHandler = async() =>{
@@ -82,6 +46,51 @@ const LeftSidebar = () => {
             logOutHandler()
         }
     }
+
+
+
+
+
+    const sideBarItems = [
+    {
+        icon : <Home/>,
+        text : "Home"
+    },
+    {
+        icon : <Search/>,
+        text : "Search"
+    },
+    {
+        icon : <TrendingUp/>,
+        text : "Explore"
+    },
+    {
+        icon : <MessageCircle/>,
+        text : "Messages"
+    },
+    {
+        icon : <Heart/>,
+        text : "Notitications"
+    },
+    {
+        icon : <PlusSquare/>,
+        text : "Create "
+    },
+    {
+        icon : (
+            <Avatar>
+                <AvatarImage src={user?.profileImg} />
+                <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+        ),
+        text : "Profile"
+    },
+    {
+        icon : <LogOut/>,
+        text : "Logout"
+    }
+]
+
 
 
   return (
