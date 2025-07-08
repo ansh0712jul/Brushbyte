@@ -10,6 +10,7 @@ import CommentDialog from './CommentDialog'
 const Post = () => {
 
     const [text , setText] = useState("")
+    const[open , setOpen] = useState(false)
 
 
     // Handler for input text change
@@ -67,7 +68,10 @@ const Post = () => {
         <div className='flex items-center justify-between my-2 '>
             <div className='flex items-center gap-3'>
                     <FaRegHeart size={'22px'} className='cursor-pointer'/>
-                    <MessageCircle className='cursor-pointer hover:text-gray-600'/>
+                    <MessageCircle 
+                     onClick={() => setOpen(true)}
+                     className='cursor-pointer hover:text-gray-600'
+                     />
                     <Send className='cursor-pointer hover:text-gray-600'/>
             </div>
             <Bookmark/>
@@ -77,8 +81,8 @@ const Post = () => {
             <span className='font-md mr-2'>username</span>
             caption
         </p>
-        <span>view all comments</span>
-        <CommentDialog/>
+        <span onClick={() => setOpen(true)} className='cursor-pointer text-sm text-gray-400'>View all comments</span>
+        <CommentDialog  open={open} setOpen={setOpen}/>
         <div className='flex items-center gap-3 mt-4'>
             <input
                 type="text"

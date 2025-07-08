@@ -85,7 +85,7 @@ const LeftSidebar = () => {
 
 
   return (
-    <div className='fixed top-0 left-0  z-10 h-screen w-[16%] bg-white shadow-lg p-5 overflow-y-auto  border-r border-gray-300'>
+    <div className='fixed top-0 left-0  z-10 h-screen w-[17%] bg-white shadow-lg p-5 overflow-y-auto  border-r border-gray-300'>
         <div className='flex flex-col'>
             <h1>LOGO</h1>
             
