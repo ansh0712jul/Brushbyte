@@ -2,8 +2,10 @@ import React from 'react'
 import Feed from './Feed'
 import { Outlet } from 'react-router-dom'
 import RightSideBar from './RightSideBar'
+import getAllPost from '../hooks/getAllPost'
 
 const Home = () => {
+  getAllPost()
   return (
     <div className='flex ' >
       <div className='flex-grow'>

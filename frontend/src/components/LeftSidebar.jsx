@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Heart, Home, LogOut, MessageCircle, PlusSquare, Search, TrendingUp,   } from 'lucide-react'; 
 import { Avatar, AvatarFallback, AvatarImage   } from './ui/avatar';
 import axios from '../config/Axios'
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../redux/authSlice';
@@ -13,6 +13,8 @@ const LeftSidebar = () => {
 
     const Navigate = useNavigate()
     const dispatch = useDispatch();
+
+    const location = useLocation();
 
     const [open, setOpen] = useState(false);
 
@@ -108,6 +110,11 @@ const LeftSidebar = () => {
 ]
 
 
+    const filteredItems = sideBarItems.filter(item => {
+        if (item.text === "Home" && location.pathname === '/') return false;
+        return true;
+    })
+
 
   return (
     <div className='fixed top-0 left-0  z-10 h-screen w-[17%] bg-white shadow-lg p-5 overflow-y-auto  border-r border-gray-300'>
@@ -115,7 +122,7 @@ const LeftSidebar = () => {
             <h1>LOGO</h1>
             
         {
-            sideBarItems.map((item , index) =>{
+            filteredItems.map((item , index) =>{
                 return (
                     <div onClick={()=>sideBarHandler(item)} key={index} className='flex items-center gap-3 relative hover:bg-gray-100 cursor-pointer rounded-lg p-3 my-3'>
                         {item.icon}

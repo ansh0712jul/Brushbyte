@@ -1,5 +1,5 @@
 
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Dialog, DialogContent, DialogHeader } from './ui/dialog'
 import { Textarea } from './ui/textarea'
@@ -7,8 +7,12 @@ import { useRef, useState } from 'react'
 import axios from "../config/Axios.js"
 import { Loader2 } from 'lucide-react'
 import { toast } from "sonner"
+import { setPosts } from '../redux/postSlice.js'
  
 const CreatePost = ({ open, setOpen }) => {
+
+    const dispatch = useDispatch();
+    const posts = useSelector((state) => state.post.posts)
 
     const [caption, setCaption] = useState("")
     const [selectedFile, setSelectedFile] = useState(null)
@@ -17,7 +21,7 @@ const CreatePost = ({ open, setOpen }) => {
     const imageRef = useRef(null)
      
     const user = useSelector((state) => state.auth.user)
-
+   
 
     const imageHandler = (e) => {
         const file = e.target.files[0];
@@ -45,13 +49,18 @@ const CreatePost = ({ open, setOpen }) => {
             'Authorization': `Bearer ${token}`
           }
         })
-        console.log(res);
-        // console.log(res.data.message);
-        setOpen(false);
-        setCaption("");
-        setSelectedFile(null);
-        setPreviewImage(null);
-        toast.success(res.data.message);
+        
+        // console.log(res.data.data);
+        if(res.data.success ){
+          dispatch(setPosts([res.data.data , ...posts ]));
+          setOpen(false);
+          setCaption("");
+          setSelectedFile(null);
+          setPreviewImage(null);
+          toast.success(res.data.message);
+
+        }
+        
 
       } catch (error) {
         console.log(error);

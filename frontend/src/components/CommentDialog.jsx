@@ -4,8 +4,12 @@ import { Link } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from './ui/button'
+import { useSelector } from 'react-redux'
 
 const CommentDialog = ({open , setOpen}) => {
+
+   const posts = useSelector((state) => state.post.posts)
+
 
   const [text , setText] = useState("");
 

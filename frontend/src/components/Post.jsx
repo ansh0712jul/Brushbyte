@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog"
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import CommentDialog from './CommentDialog'
 
-const Post = () => {
+const Post = ({post}) => {
 
     const [text , setText] = useState("")
     const[open , setOpen] = useState(false)
@@ -28,10 +28,10 @@ const Post = () => {
         <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
                 <Avatar>
-                    <AvatarImage src="" alt="User Avatar" />
+                    <AvatarImage src={post.author.profileImg} alt="User Avatar" />
                     <AvatarFallback >Cn</AvatarFallback> 
                 </Avatar>
-                <h1>username</h1>
+                <h1>{post.author.username}</h1>
             </div>
             <Dialog>
                 <DialogTrigger asChild>
@@ -62,7 +62,7 @@ const Post = () => {
                 </DialogContent>
             </Dialog>
         </div>
-         <img className='rounded-sm my-2 w-full aspect-square object-cover' src="https://images.unsplash.com/photo-1750409221671-d925a6d7126c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw0fHx8ZW58MHx8fHx8" alt="" />
+         <img className='rounded-sm my-2 w-full aspect-square object-cover' src={post.image} />
 
         
         <div className='flex items-center justify-between my-2 '>
@@ -76,10 +76,10 @@ const Post = () => {
             </div>
             <Bookmark/>
         </div>
-        <span className='font-medium mb-2 block'>1k likes</span>
+        <span className='font-medium mb-2 block'>{post.likes.length} likes</span>
         <p className=''>
-            <span className='font-md mr-2'>username</span>
-            caption
+            <span className='font-md mr-2'>{post.author.username}</span>
+            {post.caption}
         </p>
         <span onClick={() => setOpen(true)} className='cursor-pointer text-sm text-gray-400'>View all comments</span>
         <CommentDialog  open={open} setOpen={setOpen}/>
