@@ -1,23 +1,31 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Heart, Home, LogOut, MessageCircle, PlusSquare, Search, TrendingUp,   } from 'lucide-react'; 
 import { Avatar, AvatarFallback, AvatarImage   } from './ui/avatar';
 import axios from '../config/Axios'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '../redux/authSlice';
+import CreatePost from './CreatePost';
 
 
 const LeftSidebar = () => {
 
     const Navigate = useNavigate()
+    const dispatch = useDispatch();
 
+    const [open, setOpen] = useState(false);
+
+
+    // get user from the redux store
     const { user } = useSelector((state) => state.auth)
 
     // function to handle logout 
     const logOutHandler = async() =>{
         try {
             const accessToken = localStorage.getItem('accessToken')
-            console.log(accessToken)
+            // console.log(accessToken)
+
             const res = await axios.post('/logout', {}, {
                 headers: {
                     'Authorization' : `Bearer ${accessToken}`,   
@@ -32,6 +40,7 @@ const LeftSidebar = () => {
             // console.log(res)
 
             if(res.data.success) {
+                dispatch(setUser(null))
                 Navigate('/login')
                 toast.success("Logged out successfully")
             }
@@ -44,6 +53,13 @@ const LeftSidebar = () => {
     const sideBarHandler = (item) =>{
         if(item.text === "Logout") {
             logOutHandler()
+        }
+
+        if(item.text === "Create") {
+            console.log("Create Post clicked");
+            console.log("open state going to be set to true");
+            setOpen(true);
+            console.log("open state is now: ", open);
         }
     }
 
@@ -74,7 +90,7 @@ const LeftSidebar = () => {
     },
     {
         icon : <PlusSquare/>,
-        text : "Create "
+        text : "Create"
     },
     {
         icon : (
@@ -112,6 +128,7 @@ const LeftSidebar = () => {
             })
         }
         </div>
+        <CreatePost open={open} setOpen={setOpen} />
     </div>
   )
 }
