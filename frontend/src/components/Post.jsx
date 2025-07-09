@@ -8,6 +8,7 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import CommentDialog from './CommentDialog'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from "../config/Axios.js"
+import { toast } from 'sonner'
 
 const Post = ({post}) => {
 
@@ -35,15 +36,18 @@ const Post = ({post}) => {
         if (!accessToken) return;
 
         try {
-            await axios.delete(`/posts/delete-post/${post._id}`, {
+            const res = await axios.delete(`/posts/delete-post/${post._id}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
             });
             console.log("Post deleted successfully");
-            updatedPost = post.filter((p) => p._id !== post._id);
-            // useDispatch(setPosts(updatedPost)); 
+           if(res.data.success) {
+            toast.success("Post deleted successfully");
             setOpen(false);
+           }
+            
+            
         } catch (error) {
             console.error("Error deleting post:", error);
         }
