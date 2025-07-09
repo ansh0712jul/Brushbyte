@@ -10,10 +10,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import axios from "../config/Axios.js"
 import { toast } from 'sonner'
 
+
 const Post = ({post}) => {
 
     const [text , setText] = useState("")
     const[open , setOpen] = useState(false)
+    const[liked , setLiked] = useState(false) 
+    
 
 
     const user = useSelector((state) => state.auth.user)
@@ -50,8 +53,30 @@ const Post = ({post}) => {
             
         } catch (error) {
             console.error("Error deleting post:", error);
-        }
+        }   
     }
+
+
+    // handler to like or dislike a post 
+
+        const likeDislikeHandler = async() => {
+            setLiked(prev => !prev);
+            
+            const accessToken = localStorage.getItem('accessToken');
+            if (!accessToken) return;
+
+            try {
+                const res = await axios.patch(`posts/like-or-dislike-post/${post._id}`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                });
+                // if(res.data.success) toast.success(res.data.message);
+            } catch (error) {
+                console.error("Error liking or disliking post:", error);
+            }
+        }
+
   return (
     <div className='my-8 w-full max-w-sm mx-auto'>
         <div className='flex items-center justify-between'>
@@ -101,7 +126,21 @@ const Post = ({post}) => {
         
         <div className='flex items-center justify-between my-2 '>
             <div className='flex items-center gap-3'>
-                    <FaRegHeart size={'22px'} className='cursor-pointer'/>
+                    {
+                        liked ? (
+                            <FaRegHeart 
+                            onClick={likeDislikeHandler}
+                            size={'22px'} 
+                            className='cursor-pointer'
+                            />
+                        ) : (
+                            <FaHeart 
+                                onClick={likeDislikeHandler}
+                                size={'22px'} 
+                                className='cursor-pointer text-red-600  transition-transform duration-1000 ease-in-out scale-110'
+                            />
+                        )
+                    }
                     <MessageCircle 
                      onClick={() => setOpen(true)}
                      className='cursor-pointer hover:text-gray-600'
