@@ -6,12 +6,16 @@ import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog"
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import CommentDialog from './CommentDialog'
+import { useDispatch, useSelector } from 'react-redux'
+import axios from "../config/Axios.js"
 
 const Post = ({post}) => {
 
     const [text , setText] = useState("")
     const[open , setOpen] = useState(false)
 
+
+    const user = useSelector((state) => state.auth.user)
 
     // Handler for input text change
     const textHandler = (e) => {
@@ -21,6 +25,27 @@ const Post = ({post}) => {
         }
         else {
             setText("");
+        }
+    }
+
+    // Handler for deleting the post
+
+    const deletePostHandler = async() => {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) return;
+
+        try {
+            await axios.delete(`/posts/delete-post/${post._id}`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            console.log("Post deleted successfully");
+            updatedPost = post.filter((p) => p._id !== post._id);
+            // useDispatch(setPosts(updatedPost)); 
+            setOpen(false);
+        } catch (error) {
+            console.error("Error deleting post:", error);
         }
     }
   return (
@@ -53,12 +78,17 @@ const Post = ({post}) => {
                     Add to Favourites
                     </Button>
 
-                    <Button
-                    variant="ghost"
-                    className="w-full justify-center text-red-600 font-semibold text-sm hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors rounded-md"
-                    >
-                    Delete
-                    </Button>
+                    {
+                        user?._id === post.author._id && (
+                            <Button
+                            onClick = {deletePostHandler}
+                            variant="ghost"
+                            className="w-full justify-center text-red-600 font-semibold text-sm hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors rounded-md"
+                            >
+                            Delete
+                            </Button>
+                        )
+                    }
                 </DialogContent>
             </Dialog>
         </div>

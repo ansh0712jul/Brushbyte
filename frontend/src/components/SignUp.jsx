@@ -31,7 +31,7 @@ const SignUp = () => {
         }
       });
       console.log("User signed up successfully:", response.data);
-      navigate("/home");
+      navigate("/login");
     } catch (error) {
       console.error("Error signing up:", error);
     }
