@@ -3,6 +3,9 @@ import { Button } from './ui/button';
 import { Input } from "./ui/input";
 import { Link, useNavigate } from 'react-router-dom';
 import axios from "../config/Axios";
+import { useDispatch, useSelector } from 'react-redux';
+import { setPosts, setSelectedPost } from '../redux/postSlice';
+import { setUser } from '../redux/authSlice';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -12,6 +15,9 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [profileImg, setProfileImg] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+
+  const dispatch = useDispatch();
+  
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -30,7 +36,11 @@ const SignUp = () => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      console.log("User signed up successfully:", response.data);
+      if(response.data.success) {
+        dispatch(setPosts([]));
+        dispatch(setSelectedPost(null));
+        dispatch(setUser(null));
+      }
       navigate("/login");
     } catch (error) {
       console.error("Error signing up:", error);

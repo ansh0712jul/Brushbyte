@@ -7,7 +7,7 @@ const Posts = () => {
   return (
     <div>
         {
-            posts.map((post ) => {
+            Array.isArray(posts) && posts.map((post ) => {
                 return <Post key={post._id} post={post} />
             })
         }

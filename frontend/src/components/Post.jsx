@@ -9,17 +9,24 @@ import CommentDialog from './CommentDialog'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from "../config/Axios.js"
 import { toast } from 'sonner'
+import { setPosts } from '../redux/postSlice.js'
+import { setSelectedPost } from "../redux/postSlice.js"
 
 
 const Post = ({post}) => {
+    const user = useSelector((state) => state.auth.user)
+    const posts = useSelector((state) => state.post.posts);
 
     const [text , setText] = useState("")
     const[open , setOpen] = useState(false)
-    const[liked , setLiked] = useState(false) 
+    const[liked , setLiked] = useState(post.likes.includes(user._id) ||false) 
+
+    const[comment , setComment] = useState(post.comments)
     
 
 
-    const user = useSelector((state) => state.auth.user)
+    
+    const dispatch = useDispatch();
 
     // Handler for input text change
     const textHandler = (e) => {
@@ -46,6 +53,8 @@ const Post = ({post}) => {
             });
             console.log("Post deleted successfully");
            if(res.data.success) {
+            const updatedPosts = posts.filter(p => p._id !== post._id) 
+            dispatch(setPosts(updatedPosts));
             toast.success("Post deleted successfully");
             setOpen(false);
            }
@@ -71,9 +80,36 @@ const Post = ({post}) => {
                         Authorization: `Bearer ${accessToken}`
                     }
                 });
-                // if(res.data.success) toast.success(res.data.message);
+                if(res.data.success) {
+                    const updatedPost = posts.map(p => p._id === post._id ? {...p, likes: res.data.data.likes} : p);
+                    dispatch(setPosts(updatedPost));
+                }
             } catch (error) {
                 console.error("Error liking or disliking post:", error);
+            }
+        }
+
+        // Handler for submitting the comment
+
+         const commentHandler = async() => {
+            const accessToken = localStorage.getItem('accessToken');
+            if (!accessToken) return;
+            try {
+                const res = await axios.post(`/posts/add-comment-on-post/${post._id}` , {text} , {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                })
+                
+                if(res.data.success) {
+                    const updatedComment = [...comment , res.data.data];
+                    setComment(updatedComment);
+                    const updatedPost = posts.map( p => p._id === post._id ? {...p , comments: updatedComment} : p);
+                    dispatch(setPosts(updatedPost));
+                    setText("");
+                }
+            } catch (error) {
+                console.error("Error adding comment:", error);
             }
         }
 
@@ -127,7 +163,7 @@ const Post = ({post}) => {
         <div className='flex items-center justify-between my-2 '>
             <div className='flex items-center gap-3'>
                     {
-                        liked ? (
+                        !liked ? (
                             <FaRegHeart 
                             onClick={likeDislikeHandler}
                             size={'22px'} 
@@ -142,7 +178,10 @@ const Post = ({post}) => {
                         )
                     }
                     <MessageCircle 
-                     onClick={() => setOpen(true)}
+                     onClick={() => {
+                        setOpen(true)
+                        dispatch(setSelectedPost(post))
+                     }}
                      className='cursor-pointer hover:text-gray-600'
                      />
                     <Send className='cursor-pointer hover:text-gray-600'/>
@@ -154,7 +193,15 @@ const Post = ({post}) => {
             <span className='font-md mr-2'>{post.author.username}</span>
             {post.caption}
         </p>
-        <span onClick={() => setOpen(true)} className='cursor-pointer text-sm text-gray-400'>View all comments</span>
+        {
+            post.comments.length > 0 && (
+                <span onClick={() => {
+            setOpen(true)
+            dispatch(setSelectedPost(post))
+        }} 
+        className='cursor-pointer text-sm text-gray-400'>View all {post.comments.length} comments</span>
+            )
+        }
         <CommentDialog  open={open} setOpen={setOpen}/>
         <div className='flex items-center gap-3 mt-4'>
             <input
@@ -166,7 +213,7 @@ const Post = ({post}) => {
             />
            {
                 text && (
-                     <span className='text-blue-600 font-bold'>Post</span>
+                     <span onClick={commentHandler} className='text-blue-600 font-bold cursor-pointer'>Post</span>
                 )
            }
         </div>

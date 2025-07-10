@@ -31,7 +31,7 @@ const getAllPost = () =>{
         }
 
         fetchPosts();
-    },[post , dispatch])
+    },[ dispatch])
 }
 
 export default getAllPost;

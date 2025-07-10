@@ -1,17 +1,24 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Dialog, DialogContent , DialogTrigger } from './ui/dialog'
 import { Link } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from './ui/button'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import Comments from './Comments'
+import axios from "../config/Axios.js"
+import { setPosts, setSelectedPost } from '../redux/postSlice'
+
 
 const CommentDialog = ({open , setOpen}) => {
 
    const posts = useSelector((state) => state.post.posts)
-
-
+   const { selectedPost } = useSelector((state) => state.post);
+   const[comment , setComment] = useState([])
+   const dispatch = useDispatch()
   const [text , setText] = useState("");
+
+  const lastCommentref = useRef(null);
 
   // Handler for input text change
   const textHandler = (e) => {
@@ -19,17 +26,48 @@ const CommentDialog = ({open , setOpen}) => {
     const inputText = e.target.value;
     if(inputText.trim()){
       setText(inputText);
-
     }
     else setText("");
   }
 
+  useEffect(() =>{
+    if (selectedPost && Array.isArray(selectedPost.comments)) {
+    setComment(selectedPost.comments);
+  }
+  },[selectedPost])
+
 
   // Handler for submitting the comment
 
-  const submitHandler = () =>{
-    console.log("Comment submitted: ", text);
-    setText("");
+  const submitHandler = async() => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) return;
+      try {
+          const res = await axios.post(`/posts/add-comment-on-post/${selectedPost._id}` , {text} , {
+              headers: {
+                  Authorization: `Bearer ${accessToken}`
+              }
+          })
+          
+          if(res.data.success) {
+              const updatedComment = [...comment , res.data.data];
+              setComment(updatedComment);
+              const updatedPost = posts.map( p => p._id === selectedPost._id ? {...p , comments: updatedComment} : p);
+              dispatch(setPosts(updatedPost));
+              dispatch(setSelectedPost({
+                ...selectedPost,
+                comments: updatedComment
+              }));
+              setText("");
+
+              // scroll to last commment after some delay 
+              setTimeout(() => {
+                lastCommentref?.current?.scrollIntoView({ behavior: "smooth" })
+              })
+          }
+      } catch (error) {
+          console.error("Error adding comment:", error);
+      }
   }
 
 
@@ -40,9 +78,9 @@ const CommentDialog = ({open , setOpen}) => {
         <div className='flex flex-1'>
           <div className='w-1/2'>
             <img
-              src="https://images.unsplash.com/photo-1750409221671-d925a6d7126c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw0fHx8ZW58MHx8fHx8"
+              src={selectedPost?.image}
               alt="post_img"
-              className='w-full h-full object-cover rounded-l-lg'
+              className='w-full h-full  object-cover max-w-5xl max-h-[550px] rounded-l-lg'
             />
           </div>
           <div className='w-1/2 flex flex-col justify-between'>
@@ -50,12 +88,12 @@ const CommentDialog = ({open , setOpen}) => {
               <div className='flex gap-3 items-center'>
                 <Link>
                   <Avatar>
-                    <AvatarImage src="" />
+                    <AvatarImage src={selectedPost?.author?.profileImg} />
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
                 </Link>
                 <div>
-                  <Link className='font-semibold text-xs'>Author</Link>
+                  <Link className='font-semibold text-xs'>{selectedPost?.author?.username}</Link>
                   {/* <span className='text-gray-600 text-sm'>Bio here...</span> */}
                 </div>
               </div>
@@ -77,10 +115,17 @@ const CommentDialog = ({open , setOpen}) => {
             <hr className='border-gray-400 ' />
             <div className='flex-1 overflow-y-auto max-h-96 p-4'>
               
-              {/* {
-                comment.map((comment) => <Comment key={comment._id} comment={comment} />)
+              {
+                selectedPost?.comments.map((comment , index) => (
+                   <div
+                      key={comment._id}
+                      ref={index === selectedPost.comments.length - 1 ? lastCommentref : null}
+                    >
+                      <Comments comment={comment} />
+                    </div>
+                ))
                 
-              } */}
+              }
             </div>
             <div className='p-4'>
               <div className='flex items-center gap-2'>
