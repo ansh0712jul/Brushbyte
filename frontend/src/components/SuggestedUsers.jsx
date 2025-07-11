@@ -13,7 +13,7 @@ const SuggestedUsers = () => {
         <span className='font-medium text-[#3BADF8] cursor-pointer hover:text-[#3495d6]'>See All</span>
       </div>
 
-      {suggestedUser.map((user) => (
+      {Array.isArray(suggestedUser) && suggestedUser.map((user) => (
         <div
           key={user._id}
           className='flex items-center justify-between py-3 border-b border-gray-100 last:border-none'

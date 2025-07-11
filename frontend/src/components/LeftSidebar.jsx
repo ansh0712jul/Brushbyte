@@ -57,12 +57,14 @@ const LeftSidebar = () => {
             logOutHandler()
         }
 
-        if(item.text === "Create") {
-            console.log("Create Post clicked");
-            console.log("open state going to be set to true");
+        if(item.text === "Create") { 
             setOpen(true);
-            console.log("open state is now: ", open);
         }
+
+        if(item.text === "Profile") {
+            Navigate(`/profile/${user?._id}`)
+        }
+        if(item.text === "Home" ) Navigate("/")
     }
 
 
