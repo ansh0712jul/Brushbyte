@@ -204,7 +204,22 @@ const getProfile = asyncHandler( async(req , res) =>{
         throw new apiError(400, "user id is required");
     }
 
-    const user = await User.findById(userId).select("-password -refreshToken");
+   const user = await User.findById(userId)
+    .populate({ 
+        path: 'posts', 
+        match: {}, // optional filter
+        options: { sort: { createdAt: -1 } }
+    })
+    .populate({ 
+        path: 'bookmarks', 
+        match: {} 
+    })
+    .select('-password -refreshToken');
+
+    user.posts = user.posts.filter(post => post != null);
+    user.bookmarks = user.bookmarks.filter(post => post != null);
+
+    await user.save({validateBeforeSave : false});
 
     if(!user) {
         throw new apiError(404 , "user not found");

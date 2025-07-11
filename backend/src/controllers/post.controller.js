@@ -204,7 +204,7 @@ const addCommentOnPost = asyncHandler( async(req , res) => {
     })
     await comment.populate({
         path:"author",
-        select:"username , profileImg"
+        select:"username  profileImg"
     })
 
     if(!comment) {
