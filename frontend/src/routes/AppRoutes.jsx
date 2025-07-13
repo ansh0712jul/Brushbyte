@@ -5,6 +5,7 @@ import Home from '../components/Home'
 import Login from '../components/Login'
 import MainLayout from '../components/MainLayout'
 import Profile from '../components/Profile'
+import Editprofile from '../components/Editprofile'
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
             <Route path= "/" element={<MainLayout/>} >
                 <Route path="/" element={<Home/>}/>
                 <Route path='/profile/:id' element={<Profile/>}/>
+                <Route path='/account/edit' element = {<Editprofile/>} />
             </Route>
 
         </Routes>
